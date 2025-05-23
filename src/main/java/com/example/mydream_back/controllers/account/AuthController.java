@@ -1,6 +1,5 @@
 package com.example.mydream_back.controllers.account;
 
-import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.model.User;
 import com.example.mydream_back.services.account.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/account/auth")
+@RequestMapping("/api/account/auth")
 public class AuthController {
 
     @Autowired

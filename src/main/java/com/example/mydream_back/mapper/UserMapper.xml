@@ -13,13 +13,13 @@
         select u.user_id,u.user_name from tb_user u
         <where>
             <if test="user_id != null">
-                u.user_id = #{user_id}
+                AND  u.user_id = #{user_id}
             </if>
             <if test="user_name != null">
-                u.user_name = #{user_name}
+                AND  u.user_name = #{user_name}
             </if>
             <if test="user_pw != null">
-                u.user_pw = #{user_pw}
+                AND  u.user_pw = #{user_pw}
             </if>
         </where>
     </select>

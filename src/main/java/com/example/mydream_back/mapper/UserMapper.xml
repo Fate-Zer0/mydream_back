@@ -24,6 +24,40 @@
         </where>
     </select>
 
+    <select id="getConsecutiveSignInDays" resultType="int">
+        SELECT
+            IFNULL(MAX(streak_length), 0) AS consecutive_days
+        FROM (
+                 SELECT
+                     COUNT(*) AS streak_length
+                 FROM (
+                          SELECT
+                              signin_date,
+                              DATE_SUB(signin_date, INTERVAL ROW_NUMBER() OVER (ORDER BY signin_date) DAY) AS grp
+                          FROM tb_user_signin
+                          WHERE user_id = #{userId}
+                            AND signin_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                      ) AS grouped
+                 GROUP BY grp
+             ) AS streaks;
+    </select>
+
+    <insert id="signInToday">
+        INSERT INTO tb_user_signin (user_id, signin_date)
+        VALUES (#{userId}, CURDATE())
+        ON DUPLICATE KEY UPDATE
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <select id="isSignedToday" resultType="map">
+        SELECT EXISTS (
+            SELECT 1
+            FROM tb_user_signin
+            WHERE user_id = #{userId}
+              AND signin_date = CURDATE()
+        ) AS is_signed_today;
+    </select>
+
     <resultMap id="user" type="com.example.mydream_back.model.User">
         <result property="user_id" column="user_id"/>
         <result property="user_name" column="user_name"/>

@@ -14,6 +14,7 @@ public interface UserDAO {
     public List<User> addUser(User user);
     public void signInToday(@Param("userId") String user_id);
     public int getConsecutiveSignInDays(@Param("userId") String userId);
-    Map<String, Integer> isSignedToday(@Param("userId") String userId);
+    public int getSignInCount(@Param("userId") String userId);
+    Map<String, Long> isSignedToday(@Param("userId") String userId);
 
 }

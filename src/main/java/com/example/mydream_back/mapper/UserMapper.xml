@@ -42,6 +42,13 @@
              ) AS streaks;
     </select>
 
+    <select id="getSignInCount" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM tb_user_signin
+        WHERE user_id = #{userId}
+    </select>
+
     <insert id="signInToday">
         INSERT INTO tb_user_signin (user_id, signin_date)
         VALUES (#{userId}, CURDATE())

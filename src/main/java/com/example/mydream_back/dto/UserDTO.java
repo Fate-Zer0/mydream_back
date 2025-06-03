@@ -3,6 +3,15 @@ package com.example.mydream_back.dto;
 public class UserDTO {
     private String user_id;
     private String user_name;
+    private FileInfo user_img;
+
+    public FileInfo getUser_img() {
+        return user_img;
+    }
+
+    public void setUser_img(FileInfo user_img) {
+        this.user_img = user_img;
+    }
 
     public String getUser_id() {
         return user_id;

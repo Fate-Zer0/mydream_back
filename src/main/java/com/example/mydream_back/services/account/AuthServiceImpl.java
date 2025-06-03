@@ -22,6 +22,7 @@ public class AuthServiceImpl implements AuthService {
             UserDTO userDTO = new UserDTO();
             userDTO.setUser_id(t_user.getUser_id());
             userDTO.setUser_name(t_user.getUser_name());
+            userDTO.setUser_img(t_user.getUser_img());
             return userDTO;
         }
         return null;

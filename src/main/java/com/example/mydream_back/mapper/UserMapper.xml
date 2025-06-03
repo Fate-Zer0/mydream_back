@@ -10,7 +10,8 @@
     </insert>
 
     <select id="getUsers" parameterType="com.example.mydream_back.model.User" resultMap="user">
-        select u.user_id,u.user_name from tb_user u
+        select u.user_id,u.user_name,ui.img_path,ui.img_name from tb_user u
+        left join tb_user_img ui on u.user_id = ui.user_id and ui.img_type = '10001'
         <where>
             <if test="user_id != null">
                 AND  u.user_id = #{user_id}
@@ -69,6 +70,8 @@
         <result property="user_id" column="user_id"/>
         <result property="user_name" column="user_name"/>
         <result property="user_pw" column="user_pw"/>
+        <result property="user_img.file_path" column="img_path"/>
+        <result property="user_img.file_name" column="img_name"/>
     </resultMap>
 
 </mapper>

@@ -1,12 +1,22 @@
 package com.example.mydream_back.model;
 
+import com.example.mydream_back.dto.FileInfo;
+
 public class User {
 
     private String user_id;
     private String user_name;
     private String user_pw;
+    private FileInfo user_img;
     private String createtime;
 
+    public FileInfo getUser_img() {
+        return user_img;
+    }
+
+    public void setUser_img(FileInfo user_img) {
+        this.user_img = user_img;
+    }
     public String getUser_id() {
         return user_id;
     }

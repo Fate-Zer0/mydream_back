@@ -31,42 +31,16 @@ public class AuthController {
         return ResponseEntity.ok(returnValue);
     }
 
-    @PostMapping("/signIn")
-    public ResponseEntity<ReturnValue<Boolean>> signIn(@RequestBody String userid){
-        ReturnValue<Boolean> returnValue = new ReturnValue<>();
-        boolean isSigned = authService.checkIfSignedToday(userid);
-        if(!isSigned){
-            authService.signInToday(userid);
+    @GetMapping("/chickUsernameIsHave")
+    public ResponseEntity<ReturnValue<Boolean>> chickUsernameIsHave(@RequestParam String user_name){
+        ReturnValue<Boolean> returnValue = new ReturnValue<Boolean>();
+        int count = authService.getUserCountByUsername(user_name);
+        returnValue.isSuccess();
+        if( count>0 ){
+            returnValue.setRetValue(true);
+        }else{
+            returnValue.setRetValue(false);
         }
-        returnValue.isSuccess();
-        returnValue.setRetValue(!isSigned);
-        return ResponseEntity.ok(returnValue);
-    }
-
-    @GetMapping("/getSignInInfo")
-    public ResponseEntity<ReturnValue<Map<String,Object>>> getSignInInfo(@RequestParam String userid){
-        ReturnValue<Map<String,Object>> returnValue = new ReturnValue<>();
-        Map<String,Object> map = authService.getSignInInfo(userid);
-        returnValue.isSuccess();
-        returnValue.setRetValue(map);
-        return ResponseEntity.ok(returnValue);
-    }
-
-    @GetMapping("/getSignInDays")
-    public ResponseEntity<ReturnValue<Integer>> getSignInDays(@RequestParam String userid){
-        ReturnValue<Integer> returnValue = new ReturnValue<>();
-        int count = authService.getConsecutiveSignInDays(userid);
-        returnValue.isSuccess();
-        returnValue.setRetValue(count);
-        return ResponseEntity.ok(returnValue);
-    }
-
-    @GetMapping("/checkIsSigned")
-    public ResponseEntity<ReturnValue<Boolean>> checkIsSigned(@RequestParam String userid){
-        ReturnValue<Boolean> returnValue = new ReturnValue<>();
-        boolean isSigned = authService.checkIfSignedToday(userid);
-        returnValue.isSuccess();
-        returnValue.setRetValue(isSigned);
         return ResponseEntity.ok(returnValue);
     }
 

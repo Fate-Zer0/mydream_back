@@ -25,6 +25,10 @@
         </where>
     </select>
 
+    <select id="getUserCountByUsername" resultType="int">
+        select count(*) from tb_user where u.user_name = #{user_name}
+    </select>
+
     <select id="getConsecutiveSignInDays" resultType="int">
         SELECT
             IFNULL(MAX(streak_length), 0) AS consecutive_days

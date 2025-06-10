@@ -28,4 +28,8 @@ public class AuthServiceImpl implements AuthService {
     public int getUserCountByUsername(String user_name){
         return userDAO.getUserCountByUsername(user_name);
     }
+    public int signUp(User user){
+        return userDAO.addUser(user);
+    }
+
 }

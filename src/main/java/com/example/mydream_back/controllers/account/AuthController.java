@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
 
 @RestController
 @RequestMapping("/api/account/auth")
@@ -42,6 +41,30 @@ public class AuthController {
             returnValue.setRetValue(false);
         }
         return ResponseEntity.ok(returnValue);
+    }
+
+    @PostMapping("signUp")
+    public ReturnValue signUp(@RequestBody User user) {
+        ReturnValue<UserDTO> ret = new ReturnValue<>();
+
+        int count = authService.getUserCountByUsername(user.getUser_name());
+        if(count > 0){
+            ret.isFail();
+            ret.setRetDesc("用户名已存在!");
+            return ret;
+        }
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        user.setCreatetime(sdf.format(System.currentTimeMillis()));
+        int i = authService.signUp(user);
+        if(i > 0){
+            UserDTO userDTO = authService.chickUserLogin(user);
+            ret.setRetValue(userDTO);
+            ret.isSuccess();
+        }else{
+            ret.isFail();
+            ret.setRetDesc("添加失败,请确认用户信息!");
+        }
+        return ret;
     }
 
 }

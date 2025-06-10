@@ -9,12 +9,11 @@ import java.util.Map;
 
 @Mapper
 public interface UserDAO {
-    public List<User> getUsers(User user);
-    public int getUserCountByUsername(String user_name);
-    public List<User> addUser(User user);
-    public void signInToday(@Param("userId") String user_id);
-    public int getConsecutiveSignInDays(@Param("userId") String userId);
-    public int getSignInCount(@Param("userId") String userId);
+    List<User> getUsers(User user);
+    int getUserCountByUsername(String user_name);
+    int addUser(User user);
+    void signInToday(@Param("userId") String user_id);
+    int getConsecutiveSignInDays(@Param("userId") String userId);
+    int getSignInCount(@Param("userId") String userId);
     Map<String, Long> isSignedToday(@Param("userId") String userId);
-
 }

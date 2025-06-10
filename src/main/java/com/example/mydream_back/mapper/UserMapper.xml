@@ -26,7 +26,7 @@
     </select>
 
     <select id="getUserCountByUsername" resultType="int">
-        select count(*) from tb_user where u.user_name = #{user_name}
+        select count(*) from tb_user u where u.user_name = #{user_name}
     </select>
 
     <select id="getConsecutiveSignInDays" resultType="int">

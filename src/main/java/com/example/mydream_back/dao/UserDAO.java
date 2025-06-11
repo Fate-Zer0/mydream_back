@@ -14,6 +14,8 @@ public interface UserDAO {
     int addUser(User user);
     void signInToday(@Param("userId") String user_id);
     int getConsecutiveSignInDays(@Param("userId") String userId);
+    int getContinuousSignInDays(@Param("userId") String userId);
+    List<String> getSignInDatesByYearAndMonth(@Param("userId") String userId,@Param("year") int year, @Param("maxMonth") int maxMonth, @Param("minMonth") int minMonth);
     int getSignInCount(@Param("userId") String userId);
     Map<String, Long> isSignedToday(@Param("userId") String userId);
 }

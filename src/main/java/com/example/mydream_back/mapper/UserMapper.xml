@@ -30,21 +30,27 @@
     </select>
 
     <select id="getConsecutiveSignInDays" resultType="int">
-        SELECT
-            IFNULL(MAX(streak_length), 0) AS consecutive_days
+        SELECT COUNT(*) AS current_streak
         FROM (
-                 SELECT
-                     COUNT(*) AS streak_length
-                 FROM (
-                          SELECT
-                              signin_date,
-                              DATE_SUB(signin_date, INTERVAL ROW_NUMBER() OVER (ORDER BY signin_date) DAY) AS grp
-                          FROM tb_user_signin
-                          WHERE user_id = #{userId}
-                            AND signin_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                      ) AS grouped
-                 GROUP BY grp
-             ) AS streaks;
+            SELECT
+            signin_date,
+            DATE_SUB(signin_date, INTERVAL ROW_NUMBER() OVER (ORDER BY signin_date DESC) DAY) AS grp
+            FROM tb_user_signin
+            WHERE user_id = #{userId}
+            AND signin_date &lt;= CURDATE()
+        ) AS grouped
+        WHERE grp = (
+            SELECT grp
+            FROM (
+                SELECT
+                DATE_SUB(signin_date, INTERVAL ROW_NUMBER() OVER (ORDER BY signin_date DESC) DAY) AS grp
+                FROM tb_user_signin
+                WHERE user_id = #{userId}
+                AND signin_date &lt;= CURDATE()
+                ORDER BY signin_date DESC
+                LIMIT 1
+            ) AS latest
+        )
     </select>
 
     <select id="getSignInCount" resultType="int">
@@ -68,6 +74,37 @@
             WHERE user_id = #{userId}
               AND signin_date = CURDATE()
         ) AS is_signed_today;
+    </select>
+
+    <select id="getContinuousSignInDays" resultType="int">
+        WITH RECURSIVE consecutive_days AS (
+            -- 找出最近的一次签到
+            SELECT signin_date, 1 AS streak_length
+            FROM tb_user_signin
+            WHERE user_id = #{userId} AND signin_date = (
+                SELECT MAX(signin_date)
+                FROM tb_user_signin
+                WHERE user_id = #{userId}
+            )
+
+            UNION ALL
+
+            SELECT t.signin_date, cd.streak_length + 1
+            FROM tb_user_signin t
+                     INNER JOIN consecutive_days cd ON t.user_id = #{userId} AND t.signin_date = SUBDATE(cd.signin_date, 1)
+        )
+        SELECT IFNULL(MAX(streak_length), 0) AS current_consecutive_days
+        FROM consecutive_days;
+    </select>
+
+    <select id="getSignInDatesByYearAndMonth" resultType="string">
+        SELECT signin_date AS signin_date_str
+        FROM tb_user_signin
+        WHERE user_id = #{userId}
+          AND YEAR(signin_date) = #{year}
+          AND MONTH(signin_date) &lt;= #{maxMonth}
+          AND MONTH(signin_date) &gt;= #{minMonth}
+        ORDER BY signin_date ASC
     </select>
 
     <resultMap id="user" type="com.example.mydream_back.model.User">

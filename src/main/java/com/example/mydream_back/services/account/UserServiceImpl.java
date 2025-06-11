@@ -27,15 +27,21 @@ public class UserServiceImpl implements UserService {
 
     public Map<String,Object> getSignInInfo(String user_id){
         Map<String,Object> map = new HashMap<>();
-        int consecutiveSignInDays = userDAO.getConsecutiveSignInDays(user_id);
+        int maxConsecutiveSignInDays = userDAO.getConsecutiveSignInDays(user_id);
+        int consecutiveSignInDays = userDAO.getContinuousSignInDays(user_id);
         int signInCount = userDAO.getSignInCount(user_id);
         Map<String, Long> result = userDAO.isSignedToday(user_id);
         boolean isSigned = result.get("is_signed_today") == 1;
 
+        map.put("maxConsecutiveSignInDays",maxConsecutiveSignInDays);
         map.put("consecutiveSignInDays",consecutiveSignInDays);
         map.put("signInCount",signInCount);
         map.put("isSigned",isSigned);
 
         return map;
+    }
+
+    public List<String> getSignInDatesByYearAndMonth(String user_id,int year, int month){
+        return userDAO.getSignInDatesByYearAndMonth(user_id,year,month+1,month-1);
     }
 }

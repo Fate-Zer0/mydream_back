@@ -1,6 +1,6 @@
 package com.example.mydream_back.services.model.msgBoard;
 
-import com.example.mydream_back.dto.MsgBoard;
+import com.example.mydream_back.model.MsgBoard;
 
 import java.util.List;
 

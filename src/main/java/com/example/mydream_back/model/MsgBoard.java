@@ -1,4 +1,6 @@
-package com.example.mydream_back.dto;
+package com.example.mydream_back.model;
+
+import com.example.mydream_back.dto.UserDTO;
 
 import java.util.List;
 

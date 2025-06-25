@@ -1,7 +1,7 @@
 package com.example.mydream_back.services.model.msgBoard;
 
-import com.example.mydream_back.dao.MsgBoardDAO;
-import com.example.mydream_back.dto.MsgBoard;
+import com.example.mydream_back.dao.model.MsgBoardDAO;
+import com.example.mydream_back.model.MsgBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

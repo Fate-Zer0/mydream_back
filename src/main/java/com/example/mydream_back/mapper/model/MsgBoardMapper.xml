@@ -3,61 +3,52 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.mydream_back.dao.MsgBoardDAO">
+<mapper namespace="com.example.mydream_back.dao.model.MsgBoardDAO">
 
-    <insert id="insertMsgBoard" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <insert id="insertMsgBoard" parameterType="com.example.mydream_back.model.MsgBoard">
         insert into tb_msg_board ( user_id , msg_content , msg_time , msg_upcount , msg_downcount , msg_istop , msg_parid , msg_type,  msg_ordid )
         VALUES ( #{user.user_id} , #{msg_content} , #{msg_time} , 0 , 0 , #{msg_istop} , #{msg_parid}, #{msg_type} , #{msg_ordid} );
     </insert>
 
-    <select id="selectMsgBoards" resultMap="MsgBoards" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <select id="selectMsgBoards" resultMap="MsgBoards" parameterType="com.example.mydream_back.model.MsgBoard">
         SELECT
         m.msg_id,
         u.user_id,
         u.user_name,
         i.img_path,
         i.img_name,
-        inf.user_sex,
-        inf.user_grjj,
         m.msg_content,
         LEFT(m.msg_time, 16) AS msg_time,
-        m.msg_upcount,
-        m.msg_downcount,
+        IFNULL(upcount.upcount, 0) AS msg_upcount,
         IFNULL(up.upcount, 0) AS up_count,
-        IFNULL(down.downcount, 0) AS down_count,
         IFNULL(hf.hfcount, 0) AS hfcount,
         hfmsg.msg_id AS hf_msg_id,
         hfmsg.user_id AS hf_user_id,
         hfmsg.user_name AS hf_user_name,
-        hfmsg.user_sex AS hf_user_sex,
-        hfmsg.user_grjj AS hf_user_grjj,
         hfmsg.img_path AS hf_img_path,
         hfmsg.img_name AS hf_img_name,
         hfmsg.msg_content AS hf_msg_content,
         hfmsg.msg_time AS hf_msg_time,
         hfmsg.msg_upcount AS hf_msg_upcount,
-        hfmsg.msg_downcount AS hf_msg_downcount,
-        hfmsg.up_count AS hf_up_count,
-        hfmsg.down_count AS hf_down_count
+        hfmsg.up_count AS hf_up_count
         FROM
         tb_msg_board m
         LEFT JOIN tb_user u ON u.user_id = m.user_id
         LEFT JOIN tb_user_img i ON u.user_id = i.user_id AND i.img_type = 10001
-        LEFT JOIN tb_user_info inf ON u.user_id = inf.user_id
         LEFT JOIN (
-        SELECT up.obj_id, IFNULL(COUNT(up.rec_id), 0) upcount
+        SELECT up.obj_id, COUNT(up.rec_id) AS upcount
         FROM tb_record up
-        WHERE up.rec_type='lybupcount' AND up.iseffect = 1 AND up.activeman = #{user.user_id}
+        WHERE up.rec_type='61001' AND up.iseffect = 1
+        GROUP BY up.obj_id
+        ) upcount ON upcount.obj_id = m.msg_id
+        LEFT JOIN (
+        SELECT up.obj_id, COUNT(up.rec_id) AS upcount
+        FROM tb_record up
+        WHERE up.rec_type='61001' AND up.iseffect = 1 AND up.activeman = #{user.user_id}
         GROUP BY up.obj_id
         ) up ON up.obj_id = m.msg_id
         LEFT JOIN (
-        SELECT down.obj_id, IFNULL(COUNT(down.rec_id), 0) downcount
-        FROM tb_record down
-        WHERE down.rec_type='lybdowncount' AND down.iseffect = 1 AND down.activeman = #{user.user_id}
-        GROUP BY down.obj_id
-        ) down ON down.obj_id = m.msg_id
-        LEFT JOIN (
-        SELECT m.msg_parid, IFNULL(COUNT(m.msg_id), 0) hfcount
+        SELECT m.msg_parid, COUNT(m.msg_id) AS hfcount
         FROM tb_msg_board m
         WHERE m.msg_istop = 0
         GROUP BY m.msg_parid
@@ -69,40 +60,37 @@
         u.user_name,
         i.img_path,
         i.img_name,
-        inf.user_sex,
-        inf.user_grjj,
         m.msg_content,
         m.msg_parid,
         LEFT(m.msg_time, 16) AS msg_time,
-        m.msg_upcount,
-        m.msg_downcount,
-        IFNULL(up.upcount, 0) AS up_count,
-        IFNULL(down.downcount, 0) AS down_count
+        IFNULL(upcount.upcount, 0) AS msg_upcount,
+        IFNULL(up.upcount, 0) AS up_count
         FROM
         tb_msg_board m
         LEFT JOIN tb_user u ON u.user_id = m.user_id
         LEFT JOIN tb_user_img i ON u.user_id = i.user_id AND i.img_type = 10001
-        LEFT JOIN tb_user_info inf ON u.user_id = inf.user_id
         LEFT JOIN (
-        SELECT up.obj_id, IFNULL(COUNT(up.rec_id), 0) upcount
+        SELECT up.obj_id, COUNT(up.rec_id) AS upcount
         FROM tb_record up
-        WHERE up.rec_type='lybupcount' AND up.iseffect = 1 AND up.activeman = #{user.user_id}
+        WHERE up.rec_type='61001' AND up.iseffect = 1
+        GROUP BY up.obj_id
+        ) upcount ON upcount.obj_id = m.msg_id
+        LEFT JOIN (
+        SELECT up.obj_id, COUNT(up.rec_id) AS upcount
+        FROM tb_record up
+        WHERE up.rec_type='61001' AND up.iseffect = 1 AND up.activeman = #{user.user_id}
         GROUP BY up.obj_id
         ) up ON up.obj_id = m.msg_id
-        LEFT JOIN (
-        SELECT down.obj_id, IFNULL(COUNT(down.rec_id), 0) downcount
-        FROM tb_record down
-        WHERE down.rec_type='lybdowncount' AND down.iseffect = 1 AND down.activeman = #{user.user_id}
-        GROUP BY down.obj_id
-        ) down ON down.obj_id = m.msg_id
         WHERE m.msg_istop != 1
         ) hfmsg ON hfmsg.msg_parid = m.msg_id
-        WHERE
-        m.msg_istop = 1 and m.msg_type = #{msg_type}
+        WHERE m.msg_istop = 1 and m.msg_type = #{msg_type}
         <if test="msg_ordid != 0">
             and m.msg_ordid = #{msg_ordid}
         </if>
-            order by m.msg_upcount + m.msg_downcount desc;
+        ORDER BY
+        CASE WHEN DATE(m.msg_time) = CURDATE() THEN 0 ELSE 1 END,
+        CASE WHEN DATE(m.msg_time) = CURDATE() THEN m.msg_time END DESC,
+        CASE WHEN DATE(m.msg_time) != CURDATE() THEN m.msg_upcount END DESC;
 <!--        <if test="user.onchose == 0">-->
 <!--            order by m.msg_upcount + m.msg_downcount desc;-->
 <!--        </if>-->
@@ -111,31 +99,31 @@
 <!--        </if>-->
     </select>
 
-    <update id="addUpCount" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <update id="addUpCount" parameterType="com.example.mydream_back.model.MsgBoard">
         UPDATE tb_msg_board
         SET msg_upcount = msg_upcount + 1
         WHERE msg_id = #{msg_id};
     </update>
 
-    <update id="subUpCount" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <update id="subUpCount" parameterType="com.example.mydream_back.model.MsgBoard">
         UPDATE tb_msg_board
         SET msg_upcount = msg_upcount - 1
         WHERE msg_id = #{msg_id};
     </update>
 
-    <update id="subDownCount" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <update id="subDownCount" parameterType="com.example.mydream_back.model.MsgBoard">
         UPDATE tb_msg_board
         SET msg_downcount = msg_downcount - 1
         WHERE msg_id = #{msg_id};
     </update>
 
-    <update id="addDownCount" parameterType="com.example.mydream_back.dto.MsgBoard">
+    <update id="addDownCount" parameterType="com.example.mydream_back.model.MsgBoard">
         UPDATE tb_msg_board
         SET msg_downcount = msg_downcount + 1
         WHERE msg_id = #{msg_id};
     </update>
 
-    <resultMap id="MsgBoards" type="com.example.mydream_back.dto.MsgBoard">
+    <resultMap id="MsgBoards" type="com.example.mydream_back.model.MsgBoard">
         <result property="msg_id" column="msg_id" />
         <result property="user.user_id" column="user_id" />
         <result property="user.user_name" column="user_name" />
@@ -144,13 +132,12 @@
         <result property="msg_content" column="msg_content" />
         <result property="msg_time" column="msg_time"/>
         <result property="msg_upcount" column="msg_upcount"/>
-        <result property="msg_downcount" column="msg_downcount"/>
         <result property="msg_istop" column="msg_istop"/>
         <result property="msg_parid" column="msg_parid"/>
         <result property="isup" column="up_count"/>
         <result property="isdown" column="down_count"/>
         <result property="hfcount" column="hfcount"/>
-        <collection property="hf_msgbds" ofType="com.example.mydream_back.dto.MsgBoard">
+        <collection property="hf_msgbds" ofType="com.example.mydream_back.model.MsgBoard">
             <result property="msg_id" column="hf_msg_id" />
             <result property="user.user_id" column="hf_user_id" />
             <result property="user.user_name" column="hf_user_name" />
@@ -159,7 +146,6 @@
             <result property="msg_content" column="hf_msg_content" />
             <result property="msg_time" column="hf_msg_time"/>
             <result property="msg_upcount" column="hf_msg_upcount"/>
-            <result property="msg_downcount" column="hf_msg_downcount"/>
             <result property="msg_parid" column="hf_msg_parid"/>
             <result property="isup" column="hf_up_count"/>
             <result property="isdown" column="hf_down_count"/>

@@ -1,6 +1,6 @@
-package com.example.mydream_back.dao;
+package com.example.mydream_back.dao.model;
 
-import com.example.mydream_back.dto.MsgBoard;
+import com.example.mydream_back.model.MsgBoard;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

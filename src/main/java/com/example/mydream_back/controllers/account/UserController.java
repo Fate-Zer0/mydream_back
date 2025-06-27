@@ -1,6 +1,7 @@
 package com.example.mydream_back.controllers.account;
 
 import com.example.mydream_back.dto.ReturnValue;
+import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.services.account.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,15 @@ public class UserController {
         List<String> signInDates = userService.getSignInDatesByYearAndMonth(user_id, year, month);
         returnValue.isSuccess();
         returnValue.setRetValue(signInDates);
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @GetMapping("getUserInfo")
+    public ResponseEntity<ReturnValue> getUserInfo(@RequestParam String user_id) {
+        ReturnValue<UserInfo> returnValue = new ReturnValue<>();
+        UserInfo userInfo = userService.getUserInfoByUserId(user_id);
+        returnValue.setRetValue(userInfo);
+        returnValue.isSuccess();
         return ResponseEntity.ok(returnValue);
     }
 

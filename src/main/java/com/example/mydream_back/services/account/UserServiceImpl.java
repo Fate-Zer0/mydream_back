@@ -2,6 +2,7 @@ package com.example.mydream_back.services.account;
 
 import com.example.mydream_back.dao.UserDAO;
 import com.example.mydream_back.dto.UserDTO;
+import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,19 @@ public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
     public void signInToday(String userId) {
         userDAO.signInToday(userId);
+        UserInfo userInfo = userDAO.getUserInfoByUserId(userId);
+        if(userInfo == null){
+            userInfo = new UserInfo();
+            UserDTO user = new UserDTO();
+            user.setUser_id(userId);
+            userInfo.setUser(user);
+            userInfo.setUser_points("5");
+            userDAO.addUserInfo(userInfo);
+        }else{
+            String user_points = userInfo.getUser_points();
+            userInfo.setUser_points(String.valueOf(Integer.parseInt(user_points) + 5));
+            userDAO.updateUserInfo(userInfo);
+        }
     }
     public int getConsecutiveSignInDays(String user_id){
         return userDAO.getConsecutiveSignInDays(user_id);
@@ -43,5 +57,17 @@ public class UserServiceImpl implements UserService {
 
     public List<String> getSignInDatesByYearAndMonth(String user_id,int year, int month){
         return userDAO.getSignInDatesByYearAndMonth(user_id,year,month+1,month-1);
+    }
+
+    public UserInfo getUserInfoByUserId(String user_id){
+        return userDAO.getUserInfoByUserId(user_id);
+    }
+
+    public void updateUserInfo(UserInfo userInfo){
+        userDAO.updateUserInfo(userInfo);
+    }
+
+    public void addUserInfo(UserInfo userInfo){
+        userDAO.addUserInfo(userInfo);
     }
 }

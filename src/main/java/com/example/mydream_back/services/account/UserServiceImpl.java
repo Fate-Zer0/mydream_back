@@ -4,6 +4,7 @@ import com.example.mydream_back.dao.UserDAO;
 import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
+import com.example.mydream_back.utils.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class UserServiceImpl implements UserService {
     public void signInToday(String userId) {
         userDAO.signInToday(userId);
         UserInfo userInfo = userDAO.getUserInfoByUserId(userId);
-        if(userInfo == null){
+        if(StringHelper.isEmpty(userInfo.getUser_points())){
             userInfo = new UserInfo();
             UserDTO user = new UserDTO();
             user.setUser_id(userId);

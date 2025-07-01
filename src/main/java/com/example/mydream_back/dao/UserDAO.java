@@ -1,5 +1,6 @@
 package com.example.mydream_back.dao;
 
+import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
 import org.apache.ibatis.annotations.Mapper;
@@ -19,8 +20,10 @@ public interface UserDAO {
     List<String> getSignInDatesByYearAndMonth(@Param("userId") String userId,@Param("year") int year, @Param("maxMonth") int maxMonth, @Param("minMonth") int minMonth);
     int getSignInCount(@Param("userId") String userId);
     Map<String, Long> isSignedToday(@Param("userId") String userId);
-    int updateUser(User user);
     UserInfo getUserInfoByUserId(@Param("userId") String userId);
+    int updateUser(UserDTO user);
     int updateUserInfo(UserInfo userInfo);
     void addUserInfo(UserInfo userInfo);
+    void InsertUserFile(UserDTO user);
+    void updateUserFile(UserDTO user);
 }

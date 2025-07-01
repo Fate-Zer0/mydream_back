@@ -9,6 +9,10 @@ public class StringHelper {
         return str == null || str.trim().isEmpty();
     }
 
+    public static boolean isNotEmpty(String str) {
+        return !isEmpty(str);
+    }
+
     /**
      * 安全地获取字符串（防止 null 报错）
      */

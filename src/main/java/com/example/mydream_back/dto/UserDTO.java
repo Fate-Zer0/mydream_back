@@ -1,15 +1,25 @@
 package com.example.mydream_back.dto;
 
+import com.example.mydream_back.model.User;
+
 public class UserDTO {
     private String user_id;
     private String user_name;
-    private FileInfo user_img;
+    private FileInfoDTO user_img;
 
-    public FileInfo getUser_img() {
+    public User toUser(){
+        User user = new User();
+        user.setUser_id(user_id);
+        user.setUser_name(user_name);
+        user.setUser_img(user_img);
+        return user;
+    }
+
+    public FileInfoDTO getUser_img() {
         return user_img;
     }
 
-    public void setUser_img(FileInfo user_img) {
+    public void setUser_img(FileInfoDTO user_img) {
         this.user_img = user_img;
     }
 

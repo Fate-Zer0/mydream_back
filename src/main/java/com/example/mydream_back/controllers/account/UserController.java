@@ -1,14 +1,24 @@
 package com.example.mydream_back.controllers.account;
 
+import com.example.mydream_back.dto.FileInfoDTO;
 import com.example.mydream_back.dto.ReturnValue;
+import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
+import com.example.mydream_back.model.FileInfo;
+import com.example.mydream_back.model.User;
 import com.example.mydream_back.services.account.UserService;
+import com.example.mydream_back.utils.FileHelper;
+import com.example.mydream_back.utils.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/account/user")
@@ -65,13 +75,54 @@ public class UserController {
         return ResponseEntity.ok(returnValue);
     }
 
-    @GetMapping("getUserInfo")
+    @GetMapping("/getUserInfo")
     public ResponseEntity<ReturnValue> getUserInfo(@RequestParam String user_id) {
         ReturnValue<UserInfo> returnValue = new ReturnValue<>();
         UserInfo userInfo = userService.getUserInfoByUserId(user_id);
         returnValue.setRetValue(userInfo);
         returnValue.isSuccess();
         return ResponseEntity.ok(returnValue);
+    }
+
+    @PostMapping("/updateUserInfo")
+    public ResponseEntity<ReturnValue> updateUserInfo(@RequestBody UserInfo userInfo){
+        ReturnValue returnValue = new ReturnValue();
+        userService.updateUserInfo(userInfo);
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @PostMapping("/updateUserImg")
+    public ResponseEntity<ReturnValue> updateUserImg(
+            @RequestParam MultipartFile file,
+            @RequestParam String user_id) {
+        ReturnValue returnValue = new ReturnValue();
+        try {
+            FileInfo fileInfo = FileHelper.uploadFile(file, "userimg/" + user_id);
+
+            // 设置文件信息
+            FileInfoDTO fileInfoDTO = new FileInfoDTO();
+            fileInfoDTO.setFile_path("/userimg/" + user_id + "/");
+            fileInfoDTO.setFile_name(fileInfo.getStoredName());
+            fileInfoDTO.setFile_type(10001);
+            UserDTO user = new UserDTO();
+            user.setUser_id(user_id);
+            user.setUser_img(fileInfoDTO);
+
+            Boolean isNoHaveImg = StringHelper.isEmpty(user.getUser_img().getFile_url());
+            if (isNoHaveImg) {
+                userService.InsertUserFile(user);
+            } else {
+                userService.updateUserFile(user);
+            }
+
+            returnValue.isSuccess();
+            return ResponseEntity.ok(returnValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnValue.isError();
+            return ResponseEntity.ok(returnValue);
+        }
     }
 
 }

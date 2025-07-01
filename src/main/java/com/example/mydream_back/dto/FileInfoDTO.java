@@ -1,6 +1,6 @@
 package com.example.mydream_back.dto;
 
-public class FileInfo {
+public class FileInfoDTO {
     private int file_id;
     private String file_path;
     private String file_name;

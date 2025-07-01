@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserService {
-    public void signInToday(String user_id);
-    public int getConsecutiveSignInDays(String user_id);
-    public boolean checkIfSignedToday(String user_id);
-    public Map<String,Object> getSignInInfo(String user_id);
-    public List<String> getSignInDatesByYearAndMonth(String user_id, int year, int month);
-    public UserInfo getUserInfoByUserId(String user_id);
-    public void updateUserInfo(UserInfo userInfo);
-    public void addUserInfo(UserInfo userInfo);
+    void signInToday(String user_id);
+    int getConsecutiveSignInDays(String user_id);
+    boolean checkIfSignedToday(String user_id);
+    Map<String,Object> getSignInInfo(String user_id);
+    List<String> getSignInDatesByYearAndMonth(String user_id, int year, int month);
+    UserInfo getUserInfoByUserId(String user_id);
+    void updateUserInfo(UserInfo userInfo);
+    void addUserInfo(UserInfo userInfo);
+    void InsertUserFile(UserDTO user);
+    void updateUserFile(UserDTO user);
 }

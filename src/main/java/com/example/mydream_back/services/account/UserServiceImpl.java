@@ -65,10 +65,30 @@ public class UserServiceImpl implements UserService {
     }
 
     public void updateUserInfo(UserInfo userInfo){
-        userDAO.updateUserInfo(userInfo);
+        User user = new User();
+        String user_name = userInfo.getUser().getUser_name();
+        user.setUser_name(user_name);
+        if(StringHelper.isNotEmpty(user_name) && userDAO.getUsers(user).size() == 0){
+            userDAO.updateUser(userInfo.getUser());
+        }
+
+        UserInfo userInfo_t = userDAO.getUserInfoByUserId(userInfo.getUser().getUser_id());
+        if(StringHelper.isEmpty(userInfo_t.getUser_points())){
+            userInfo.setUser_points("0");
+            userDAO.addUserInfo(userInfo);
+        }else{
+            userDAO.updateUserInfo(userInfo);
+        }
     }
 
     public void addUserInfo(UserInfo userInfo){
         userDAO.addUserInfo(userInfo);
     }
+    public void InsertUserFile(UserDTO user){
+        userDAO.InsertUserFile(user);
+    }
+    public void updateUserFile(UserDTO user){
+        userDAO.updateUserFile(user);
+    }
+
 }

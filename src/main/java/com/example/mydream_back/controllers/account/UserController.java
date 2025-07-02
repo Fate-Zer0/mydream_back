@@ -93,10 +93,10 @@ public class UserController {
     }
 
     @PostMapping("/updateUserImg")
-    public ResponseEntity<ReturnValue> updateUserImg(
+    public ResponseEntity<ReturnValue<FileInfoDTO>> updateUserImg(
             @RequestParam MultipartFile file,
             @RequestParam String user_id) {
-        ReturnValue returnValue = new ReturnValue();
+        ReturnValue<FileInfoDTO> returnValue = new ReturnValue<>();
         try {
             FileInfo fileInfo = FileHelper.uploadFile(file, "userimg/" + user_id);
 
@@ -116,6 +116,7 @@ public class UserController {
                 userService.updateUserFile(user);
             }
 
+            returnValue.setRetValue(fileInfoDTO);
             returnValue.isSuccess();
             return ResponseEntity.ok(returnValue);
         } catch (Exception e) {

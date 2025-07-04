@@ -139,6 +139,10 @@
         where user_id = #{user_id}
     </update>
 
+    <update id="updateUserPassword" parameterType="com.example.mydream_back.model.User">
+        update tb_user set user_pw = #{user_pw} where user_name = #{user_name}
+    </update>
+
     <update id="updateUserInfo" parameterType="com.example.mydream_back.dto.UserInfo">
         update tb_user_info
             <set>
@@ -179,5 +183,61 @@
     <update id="updateUserFile" parameterType="com.example.mydream_back.dto.UserDTO">
         update tb_user_img set img_name = convert(#{user_img.file_name} using latin1) , img_path = #{user_img.file_path}  where user_id = #{user_id} and img_type = #{user_img.file_type};
     </update>
+
+    <insert id="addSecQuestion" parameterType="com.example.mydream_back.dto.SecurityQuestion">
+        insert into tb_user_secquestion (user_id,question,answer,createtime,state) values (#{user.user_id},#{question},#{answer},#{createtime},#{state});
+    </insert>
+
+    <update id="updateSecQuestion" parameterType="com.example.mydream_back.dto.SecurityQuestion">
+        update tb_user_secquestion
+            <set>
+                <if test="question != null">
+                    question = #{question},
+                </if>
+                <if test="answer != null">
+                    answer = #{answer},
+                </if>
+                <if test="state != null">
+                    state = #{state},
+                </if>
+            </set>
+        where secq_id = #{secq_id}
+    </update>
+
+    <select id="getUserSecQuestion" resultMap="secQuestion">
+        select s.user_id,u.user_name,
+               s.secq_id,s.question,
+               s.answer,s.createtime,
+               s.state
+        from tb_user_secquestion s
+            left join tb_user u on u.user_id = s.user_id
+        where s.user_id = #{userId} and s.state = '1'
+    </select>
+
+    <select id="getUserSecQuestionByUsername" resultMap="secQuestion">
+        select s.user_id,u.user_name,'' answer,
+               s.secq_id,s.question,s.createtime,
+               s.state
+        from tb_user_secquestion s
+            left join tb_user u on u.user_id = s.user_id
+        where u.user_name = #{user_name} and s.state = '1'
+    </select>
+
+    <select id="chickAnswer" resultType="int">
+        select count(*)
+        from tb_user_secquestion
+        where secq_id = #{secq_id} and answer = #{answer}
+    </select>
+
+
+    <resultMap id="secQuestion" type="com.example.mydream_back.dto.SecurityQuestion">
+        <result property="user.user_id" column="user_id"/>
+        <result property="user.user_name" column="user_name"/>
+        <result property="secq_id" column="secq_id"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="createtime" column="createtime"/>
+        <result property="state" column="state"/>
+    </resultMap>
 
 </mapper>

@@ -1,10 +1,12 @@
 package com.example.mydream_back.services.account;
 
 import com.example.mydream_back.dao.UserDAO;
+import com.example.mydream_back.dto.SecurityQuestion;
 import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
 import com.example.mydream_back.utils.StringHelper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -90,5 +92,31 @@ public class UserServiceImpl implements UserService {
     public void updateUserFile(UserDTO user){
         userDAO.updateUserFile(user);
     }
+    public void addSecQuestion(SecurityQuestion secQuestion){
+        userDAO.addSecQuestion(secQuestion);
+    }
+    public void updateSecQuestion(SecurityQuestion secQuestion){
+        userDAO.updateSecQuestion(secQuestion);
+    }
+    public List<SecurityQuestion> getUserSecQuestion(String userId){
+        return userDAO.getUserSecQuestion(userId);
+    }
+    public List<SecurityQuestion> getUserSecQuestionByUsername(String user_name){
+        return userDAO.getUserSecQuestionByUsername(user_name);
+    }
 
+    public Boolean chickAnswer(String secq_id,String answer){
+        int count = userDAO.chickAnswer(secq_id,answer);
+        if(count > 0){
+            return true;
+        }
+        return false;
+    }
+
+    public void updateUserPassword(String user_name,String password){
+        User user = new User();
+        user.setUser_name(user_name);
+        user.setUser_pw(password);
+        userDAO.updateUserPassword(user);
+    }
 }

@@ -1,24 +1,21 @@
 package com.example.mydream_back.controllers.account;
 
-import com.example.mydream_back.dto.FileInfoDTO;
-import com.example.mydream_back.dto.ReturnValue;
-import com.example.mydream_back.dto.UserDTO;
-import com.example.mydream_back.dto.UserInfo;
+import com.example.mydream_back.dto.*;
 import com.example.mydream_back.model.FileInfo;
 import com.example.mydream_back.model.User;
 import com.example.mydream_back.services.account.UserService;
 import com.example.mydream_back.utils.FileHelper;
 import com.example.mydream_back.utils.StringHelper;
+import com.example.mydream_back.utils.TimeCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/account/user")
@@ -124,6 +121,75 @@ public class UserController {
             returnValue.isError();
             return ResponseEntity.ok(returnValue);
         }
+    }
+
+    @PostMapping("/updateUserSecQuestion")
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<ReturnValue> updateUserSecQuestion(@RequestBody List<SecurityQuestion> secQuestions){
+        ReturnValue returnValue = new ReturnValue();
+        for (SecurityQuestion secQuestion : secQuestions){
+            String secq_id = secQuestion.getSecq_id();
+            String question = secQuestion.getQuestion();
+            if(StringHelper.isEmpty(secq_id) && StringHelper.isEmpty(question)){
+                continue;
+            }
+            if(StringHelper.isEmpty(question)){
+                secQuestion.setQuestion(null);
+                secQuestion.setAnswer(null);
+                secQuestion.setState("0");
+                userService.updateSecQuestion(secQuestion);
+                continue;
+            }
+            secQuestion.setCreatetime(TimeCreator.nowStr());
+            secQuestion.setState("1");
+            if(StringHelper.isNotEmpty(secq_id)){
+                userService.addSecQuestion(secQuestion);
+                secQuestion.setQuestion(null);
+                secQuestion.setAnswer(null);
+                secQuestion.setState("0");
+                userService.updateSecQuestion(secQuestion);
+            }else{
+                userService.addSecQuestion(secQuestion);
+            }
+        }
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @GetMapping("/getUserSecQuestion")
+    public ResponseEntity<ReturnValue<List<SecurityQuestion>>> getUserSecQuestion(@RequestParam String user_id){
+        ReturnValue<List<SecurityQuestion>> returnValue = new ReturnValue<>();
+        List<SecurityQuestion> secQuestions = userService.getUserSecQuestion(user_id);
+        returnValue.setRetValue(secQuestions);
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @GetMapping("/getUserSecQuestionNoAnswer")
+    public ResponseEntity<ReturnValue<List<SecurityQuestion>>> getUserSecQuestionNoAnswer(@RequestParam String user_name){
+        ReturnValue<List<SecurityQuestion>> returnValue = new ReturnValue<>();
+        List<SecurityQuestion> secQuestions = userService.getUserSecQuestionByUsername(user_name);
+        returnValue.setRetValue(secQuestions);
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @GetMapping("/checkAnswer")
+    public ResponseEntity<ReturnValue<Boolean>> checkAnswer(@RequestParam String secq_id,@RequestParam String answer){
+        ReturnValue<Boolean> returnValue = new ReturnValue<>();
+        boolean isRight = userService.chickAnswer(secq_id,answer);
+        returnValue.isSuccess();
+        returnValue.setRetValue(isRight);
+        return ResponseEntity.ok(returnValue);
+    }
+
+    @PostMapping("/updateUserPassword")
+    public ResponseEntity<ReturnValue<Boolean>> updateUserPassword(@RequestParam String user_name,@RequestParam String password){
+        ReturnValue<Boolean> returnValue = new ReturnValue<>();
+        userService.updateUserPassword(user_name,password);
+        returnValue.isSuccess();
+        returnValue.setRetValue(true);
+        return ResponseEntity.ok(returnValue);
     }
 
 }

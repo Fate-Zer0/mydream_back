@@ -8,6 +8,24 @@ public class UserInfo {
     private String user_sex_code;
     private String user_sex_name;
     private String user_grjj;
+    private String user_status_code;
+    private String user_status_name;
+
+    public String getUser_status_code() {
+        return user_status_code;
+    }
+
+    public void setUser_status_code(String user_status_code) {
+        this.user_status_code = user_status_code;
+    }
+
+    public String getUser_status_name() {
+        return user_status_name;
+    }
+
+    public void setUser_status_name(String user_status_name) {
+        this.user_status_name = user_status_name;
+    }
 
     public UserDTO getUser() {
         return user;

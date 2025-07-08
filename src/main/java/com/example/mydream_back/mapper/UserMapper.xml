@@ -118,11 +118,14 @@
     <select id="getUserInfoByUserId" resultMap="userInfo">
         SELECT u.user_id,u.user_name,u.createtime,
                im.img_path,im.img_name,
-               i.user_sex,d.dic_name user_sex_name,i.user_grjj,i.user_points
+               i.user_sex,d.dic_name user_sex_name,i.user_grjj,i.user_points,
+               s.user_status,d1.dic_name user_status_name,s.status_time
         FROM tb_user u
                  left join tb_user_img im on u.user_id = im.user_id and im.img_type = '10001'
                  left join tb_user_info i on u.user_id = i.user_id
                  left join tb_dictionary d on d.dic_id = i.user_sex
+                 left join tb_user_status s on u.user_id = s.user_id
+                 left join tb_dictionary d1 on d1.dic_id = s.user_status
         where u.user_id = #{userId}
     </select>
 
@@ -171,9 +174,12 @@
         <result property="user.user_img.file_name" column="img_name"/>
         <result property="user_sex_code" column="user_sex"/>
         <result property="user_sex_name" column="user_sex_name"/>
+        <result property="user_status_code" column="user_status"/>
+        <result property="user_status_name" column="user_status_name"/>
         <result property="user_grjj" column="user_grjj"/>
         <result property="user_points" column="user_points"/>
         <result property="user_create_date" column="createtime"/>
+        <result property="last_sign_in_date" column="status_time"/>
     </resultMap>
 
     <insert id="InsertUserFile" parameterType="com.example.mydream_back.dto.UserDTO">
@@ -239,5 +245,14 @@
         <result property="createtime" column="createtime"/>
         <result property="state" column="state"/>
     </resultMap>
+
+    <insert id="addUserStatus" parameterType="com.example.mydream_back.dto.UserInfo">
+        insert into tb_user_status (user_id,user_status,status_time) values (#{user.user_id},#{user_status_code},#{last_sign_in_date});
+    </insert>
+
+    <update id="updateUserStatus" parameterType="com.example.mydream_back.dto.UserInfo">
+        update tb_user_status s set s.user_status = #{user_status_code},s.status_time = #{last_sign_in_date}
+        where s.user_id = #{user.user_id}
+    </update>
 
 </mapper>

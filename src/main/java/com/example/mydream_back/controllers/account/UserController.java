@@ -192,4 +192,19 @@ public class UserController {
         return ResponseEntity.ok(returnValue);
     }
 
+    @PostMapping("/updateUserStatus")
+    public ResponseEntity<ReturnValue> updateUserStatus(@RequestBody UserInfo userInfo){
+        ReturnValue returnValue = new ReturnValue();
+        String user_id = userInfo.getUser().getUser_id();
+        UserInfo userInfo_t = userService.getUserInfoByUserId(user_id);
+        userInfo.setLast_sign_in_date(TimeCreator.nowStr());
+        if(StringHelper.isEmpty(userInfo_t.getLast_sign_in_date())){
+            userService.addUserStatus(userInfo);
+        }else{
+            userService.updateUserStatus(userInfo);
+        }
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
 }

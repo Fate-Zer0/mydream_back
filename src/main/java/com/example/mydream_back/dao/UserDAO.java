@@ -33,4 +33,6 @@ public interface UserDAO {
     List<SecurityQuestion> getUserSecQuestion(@Param("userId") String userId);
     List<SecurityQuestion> getUserSecQuestionByUsername(@Param("user_name") String user_name);
     int chickAnswer(@Param("secq_id") String secq_id,@Param("answer") String answer);
+    void addUserStatus(UserInfo userInfo);
+    void updateUserStatus(UserInfo userInfo);
 }

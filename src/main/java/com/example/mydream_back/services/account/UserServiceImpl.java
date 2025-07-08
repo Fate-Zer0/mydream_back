@@ -119,4 +119,12 @@ public class UserServiceImpl implements UserService {
         user.setUser_pw(password);
         userDAO.updateUserPassword(user);
     }
+
+    public void addUserStatus(UserInfo userInfo){
+        userDAO.addUserStatus(userInfo);
+    }
+
+    public void updateUserStatus(UserInfo userInfo){
+        userDAO.updateUserStatus(userInfo);
+    }
 }

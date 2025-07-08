@@ -26,4 +26,6 @@ public interface UserService {
     List<SecurityQuestion> getUserSecQuestionByUsername(String user_name);
     Boolean chickAnswer(String secq_id,String answer);
     void updateUserPassword(String user_name,String password);
+    void addUserStatus(UserInfo userInfo);
+    void updateUserStatus(UserInfo userInfo);
 }

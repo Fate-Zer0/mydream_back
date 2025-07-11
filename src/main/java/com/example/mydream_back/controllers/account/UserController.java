@@ -2,7 +2,6 @@ package com.example.mydream_back.controllers.account;
 
 import com.example.mydream_back.dto.*;
 import com.example.mydream_back.model.FileInfo;
-import com.example.mydream_back.model.User;
 import com.example.mydream_back.services.account.UserService;
 import com.example.mydream_back.utils.FileHelper;
 import com.example.mydream_back.utils.StringHelper;

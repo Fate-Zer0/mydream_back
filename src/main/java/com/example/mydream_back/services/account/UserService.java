@@ -28,4 +28,5 @@ public interface UserService {
     void updateUserPassword(String user_name,String password);
     void addUserStatus(UserInfo userInfo);
     void updateUserStatus(UserInfo userInfo);
+    void changerUserStatus(String user_id,String status);
 }

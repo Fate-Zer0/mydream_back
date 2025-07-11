@@ -6,6 +6,7 @@ import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
 import com.example.mydream_back.utils.StringHelper;
+import com.example.mydream_back.utils.TimeCreator;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -125,6 +126,17 @@ public class UserServiceImpl implements UserService {
     }
 
     public void updateUserStatus(UserInfo userInfo){
+        userDAO.updateUserStatus(userInfo);
+    }
+
+    @Override
+    public void changerUserStatus(String user_id,String status){
+        UserInfo userInfo = new UserInfo();
+        UserDTO user = new UserDTO();
+        user.setUser_id(user_id);
+        userInfo.setUser_status_code(status);
+        userInfo.setLast_sign_in_date(TimeCreator.nowStr());
+        userInfo.setUser(user);
         userDAO.updateUserStatus(userInfo);
     }
 }

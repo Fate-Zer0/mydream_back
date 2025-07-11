@@ -26,6 +26,7 @@ public class AuthController {
             returnValue.setRetValue(userDTO);
         }else{
             returnValue.isFail();
+            returnValue.setRetDesc("用户名或密码错误!");
         }
         return ResponseEntity.ok(returnValue);
     }

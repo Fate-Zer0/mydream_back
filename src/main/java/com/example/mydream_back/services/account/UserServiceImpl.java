@@ -137,6 +137,11 @@ public class UserServiceImpl implements UserService {
         userInfo.setUser_status_code(status);
         userInfo.setLast_sign_in_date(TimeCreator.nowStr());
         userInfo.setUser(user);
-        userDAO.updateUserStatus(userInfo);
+        UserInfo userInfo_t = getUserInfoByUserId(user_id);
+        if(StringHelper.isEmpty(userInfo_t.getLast_sign_in_date())){
+            userDAO.addUserStatus(userInfo);
+        }else{
+            userDAO.updateUserStatus(userInfo);
+        }
     }
 }

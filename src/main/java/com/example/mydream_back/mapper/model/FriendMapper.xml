@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.FriendDAO">
+
+    <select id="chickIsFriend" resultType="int">
+        select count(*) from  tb_user_friend f
+        where f.user_id = #{user_id} and  f.friend_id = #{friend_id} and f.state = '1'
+    </select>
+
+    <select id="getFriendState" resultType="string">
+        select state from tb_user_friend
+        where user_id = #{user_id} and friend_id = #{friend_id} and state != '-1' and state != '-2'
+    </select>
+
+    <select id="getFriendInfoByFri_id" resultMap="FriendInfo">
+        select f.fri_id , f.user_id,f.friend_id,f.createtime,f.state
+        from tb_user_friend f where f.fri_id = #{fri_id}
+    </select>
+
+    <select id="getFriendInfo" resultMap="FriendInfo">
+        select f.fri_id , f.user_id,f.friend_id,f.createtime,f.state
+        from tb_user_friend f
+            <where>
+                <if test="user_id != null and user_id != '' ">
+                    and user_id = #{user_id}
+                </if>
+                <if test="friend_id != null and friend_id != '' ">
+                    and friend_id = #{friend_id}
+                </if>
+                <if test="state != null and state != '' ">
+                    and state = #{state}
+                </if>
+                and state != '-1' and state != '-2'
+            </where>
+    </select>
+
+    <select id="getFriendInfoList" resultMap="FriendInfo">
+        select f.fri_id , f.user_id,f.friend_id,f.createtime,f.state,
+        u1.user_name user_name,ui1.img_path img_path,ui1.img_name img_name,
+        u2.user_name friend_name,ui2.img_path friend_img_path,ui2.img_name friend_img_name
+        from tb_user_friend f
+        left join tb_user u1 on f.user_id = u1.user_id
+        left join tb_user_img ui1 on u1.user_id = ui1.user_id and ui1.img_type = '10001'
+        left join tb_user u2 on f.friend_id = u2.user_id
+        left join tb_user_img ui2 on u2.user_id = ui2.user_id and ui2.img_type = '10001'
+        <where>
+            <if test="user_id != null and user_id != '' ">
+                and f.user_id = #{user_id}
+            </if>
+            <if test="friend_id != null and friend_id != '' ">
+                and f.friend_id = #{friend_id}
+            </if>
+            <if test="state != null and state != '' ">
+                and f.state = #{state}
+            </if>
+            and f.state != '-1' and f.state != '-2'
+        </where>
+    </select>
+
+    <insert id="addFriend" parameterType="com.example.mydream_back.dto.FriendInfo">
+        insert into tb_user_friend(user_id,friend_id,createtime,state)
+        values(#{user.user_id},#{friend.user_id},#{createtime},#{state})
+    </insert>
+
+    <update id="updateFriendState" parameterType="com.example.mydream_back.dto.FriendInfo">
+        update tb_user_friend
+        set state=#{state}
+        where user_id=#{user.user_id} and friend_id=#{friend.user_id}
+    </update>
+
+    <update id="updateFriendStateByFri_id" parameterType="com.example.mydream_back.dto.FriendInfo">
+        update tb_user_friend
+        set state=#{state}
+        where fri_id = #{fri_id}
+    </update>
+
+    <select id="searchUser" resultMap="user">
+        select u.user_id,u.user_name,ui.img_path,ui.img_name
+        from tb_user u
+        left join tb_user_img ui on u.user_id = ui.user_id and ui.img_type = '10001'
+        where u.user_name like concat('%',#{user_name},'%')
+    </select>
+
+    <resultMap id="FriendInfo" type="com.example.mydream_back.dto.FriendInfo">
+        <result property="user.user_id" column="user_id"/>
+        <result property="user.user_name" column="user_name"/>
+        <result property="user.user_img.file_path" column="img_path"/>
+        <result property="user.user_img.file_name" column="img_name"/>
+        <result property="friend.user_id" column="friend_id"/>
+        <result property="friend.user_name" column="friend_name"/>
+        <result property="friend.user_img.file_path" column="friend_img_path"/>
+        <result property="friend.user_img.file_name" column="friend_img_name"/>
+        <result property="createtime" column="createtime"/>
+        <result property="state" column="state"/>
+    </resultMap>
+
+    <resultMap id="user" type="com.example.mydream_back.dto.UserDTO">
+        <result property="user_id" column="user_id"/>
+        <result property="user_name" column="user_name"/>
+        <result property="user_img.file_path" column="img_path"/>
+        <result property="user_img.file_name" column="img_name"/>
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.ChatDAO">
+
+    <select id="getChatMessageList" resultMap="Message" parameterType="com.example.mydream_back.dto.Message">
+        select msg_id,msg_content,createtime,send_id,receive_id,msg_type,msg_state,send_type
+        from tb_msg_chat
+        <where>
+            <if test=" msg_id != null ">
+                AND msg_id = #{msg_id}
+            </if>
+            <if test=" send_id != null ">
+                AND send_id = #{send_id}
+            </if>
+            <if test=" receive_id != null ">
+                AND receive_id = #{receive_id}
+            </if>
+            <if test=" send_type != null ">
+                AND send_type = #{send_type}
+            </if>
+            <if test=" msg_type != null ">
+                AND msg_type = #{msg_type}
+            </if>
+            <if test=" msg_state != null ">
+                AND msg_state = #{msg_state}
+            </if>
+        </where>
+    </select>
+
+    <select id="getChatMessageListBySendidAndReceiceid" resultMap="Message" parameterType="com.example.mydream_back.dto.Message">
+        select msg_id,msg_content,createtime,send_id,receive_id,msg_type,msg_state,send_type
+        from tb_msg_chat
+        <where>
+            (send_id = #{send_id} and receive_id = #{receive_id}) or (send_id = #{receive_id} and receive_id = #{send_id})
+            <if test=" send_type != null ">
+                AND send_type = #{send_type}
+            </if>
+        </where>
+        order by createtime
+    </select>
+
+    <select id="getLastChatMessage" resultMap="Message" parameterType="com.example.mydream_back.dto.Message">
+        SELECT
+        msg_id,
+        msg_content,
+        createtime,
+        send_id,
+        receive_id,
+        msg_type,
+        msg_state,
+        send_type
+        FROM tb_msg_chat
+        <where>
+            send_id = #{send_id} AND receive_id = #{receive_id}
+            <if test="send_type != null">
+                AND send_type = #{send_type}
+            </if>
+        </where>
+        ORDER BY createtime DESC
+        LIMIT 1
+    </select>
+
+    <insert id="addChatMessage" parameterType="com.example.mydream_back.dto.Message">
+        insert into tb_msg_chat (msg_content,createtime,send_id,receive_id,msg_type,msg_state,send_type) values (#{msg_content},#{createtime},#{send_id},#{receive_id},#{msg_type},#{msg_state},#{send_type})
+    </insert>
+
+    <resultMap id="Message" type="com.example.mydream_back.dto.Message">
+        <result property="msg_id" column="msg_id"/>
+        <result property="msg_content" column="msg_content"/>
+        <result property="createtime" column="createtime"/>
+        <result property="send_id" column="send_id"/>
+        <result property="receive_id" column="receive_id"/>
+        <result property="msg_type" column="msg_type"/>
+        <result property="msg_state" column="msg_state"/>
+        <result property="send_type" column="send_type"/>
+    </resultMap>
+
+    <resultMap id="ChatInfo" type="com.example.mydream_back.dto.ChatInfo">
+        <result property="chat_user.user.user_id" column="user_id"/>
+        <result property="chat_user.user.user_name" column="user_name"/>
+        <result property="unread_count" column="nub"/>
+        <result property="chat_count" column="total_msg_count"/>
+        <association property="lastMessage" resultMap="Message" />
+    </resultMap>
+
+    <select id="getChatInfoList" resultMap="ChatInfo">
+        WITH friends AS (
+            SELECT friend_id
+            FROM tb_user_friend
+            WHERE user_id = #{user_id} AND state = '1'
+        ),
+             chats AS (
+                 SELECT
+                     CASE
+                         WHEN send_id = #{user_id} THEN receive_id
+                         ELSE send_id
+                         END AS other_id,
+                     msg_id,
+                     msg_content,
+                     createtime,
+                     send_id,
+                     receive_id,
+                     msg_type,
+                     send_type
+                 FROM tb_msg_chat
+                 WHERE send_id = #{user_id} OR receive_id = #{user_id}
+             ),
+             latest_chat AS (
+                 SELECT
+                     *,
+                     ROW_NUMBER() OVER (PARTITION BY other_id ORDER BY createtime DESC, msg_id DESC) AS rn
+                 FROM chats
+             ),
+             last_message AS (
+                 SELECT * FROM latest_chat WHERE rn = 1
+             ),
+             unread_count AS (
+                 SELECT
+                     send_id AS from_id,
+                     COUNT(*) AS nub
+                 FROM tb_msg_chat
+                 WHERE receive_id = #{user_id} AND msg_state = '0'
+                 GROUP BY send_id
+             ),
+             total_count AS (
+                 SELECT
+                     CASE WHEN send_id = #{user_id} THEN receive_id ELSE send_id END AS friend_id,
+                     COUNT(*) AS total_msg_count
+                 FROM tb_msg_chat
+                 WHERE send_id = #{user_id} OR receive_id = #{user_id}
+                 GROUP BY
+                     CASE WHEN send_id = #{user_id} THEN receive_id ELSE send_id END
+             )
+
+        SELECT
+            u.user_id,
+            u.user_name,
+            COALESCE(uc.nub, 0) AS nub,
+            COALESCE(tc.total_msg_count, 0) AS total_msg_count,
+            lm.msg_id,
+            lm.msg_content,
+            lm.createtime,
+            lm.send_id,
+            lm.receive_id,
+            lm.msg_type,
+            lm.send_type
+        FROM (
+                 SELECT friend_id AS user_id FROM friends
+                 UNION
+                 SELECT other_id AS user_id
+                 FROM chats
+                 WHERE other_id NOT IN (SELECT friend_id FROM friends)
+             ) all_objects
+                 JOIN tb_user u ON u.user_id = all_objects.user_id
+                 LEFT JOIN last_message lm ON lm.other_id = u.user_id
+                 LEFT JOIN unread_count uc ON uc.from_id = u.user_id
+                 LEFT JOIN total_count tc ON tc.friend_id = u.user_id
+        ORDER BY
+            CASE WHEN lm.createtime IS NOT NULL THEN 0 ELSE 1 END,
+            lm.createtime DESC;
+    </select>
+
+    <update id="updateUnreadMessage" parameterType="com.example.mydream_back.dto.Message">
+        update tb_msg_chat c set c.msg_state = '1'
+        where c.send_id = #{receive_id} and c.receive_id = #{send_id}
+    </update>
+
+</mapper>

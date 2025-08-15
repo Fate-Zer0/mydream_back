@@ -16,17 +16,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private CustomHandshakeInterceptor customHandshakeInterceptor;
     @Autowired
     private WebSocketProperties webSocketProperties;
+    @Autowired
+    private CustomHandshakeHandler customHandshakeHandler;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws") // 直接注册 WebSocket 端点
                 .setAllowedOriginPatterns(webSocketProperties.getAllowedOrigin()) // 只允许前端地址
-                .setHandshakeHandler(new CustomHandshakeHandler())
+                .setHandshakeHandler(customHandshakeHandler)
                 .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/queue");
+        registry.setUserDestinationPrefix("/user"); // 用于用户私信
     }
 }

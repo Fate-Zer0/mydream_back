@@ -2,6 +2,7 @@ package com.example.mydream_back.utils;
 
 import com.example.mydream_back.model.UserPrincipal;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
@@ -11,6 +12,7 @@ import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Component
 public class CustomHandshakeHandler extends DefaultHandshakeHandler {
 
     @Override

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.ShareFileDAO">
+    <insert id="addShareFile" parameterType="com.example.mydream_back.dto.ShareFileInfo">
+        INSERT INTO tb_share_file (share_user_id, share_file_id, description, file_type, file_size, file_name,
+        share_state,share_time
+        ) VALUES (#{share_user.user_id} ,#{share_file.file_id},#{description},
+        #{file_type},#{file_size},#{file_name},#{share_state}, #{share_time});
+    </insert>
+
+    <select id="queryShareFile" resultMap="ShareFile">
+        SELECT share_id,description,file_name,file_type,file_size,share_state,share_time,
+               i.img_path, i.img_name,
+               u.user_id,u.user_name
+        FROM tb_share_file
+                 left join tb_user u on u.user_id = share_user_id
+                 left join tb_user_img i on i.img_id = share_file_id
+        order by share_time desc;
+    </select>
+
+    <select id="queryShareFileByFileid" resultMap="ShareFile">
+        SELECT share_id,description,file_name,file_type,file_size,share_state,share_time,
+               i.img_path, i.img_name,
+               u.user_id,u.user_name
+        FROM tb_share_file
+                 left join tb_user u on u.user_id = share_user_id
+                 left join tb_user_img i on i.img_id = share_file_id
+        where share_file_id = #{file_id}
+        order by share_time desc;
+    </select>
+
+    <resultMap id="ShareFile" type="com.example.mydream_back.dto.ShareFileInfo">
+        <id property="share_id" column="share_id"/>
+        <result property="description" column="description"/>
+        <result property="file_name" column="file_name"/>
+        <result property="file_type" column="file_type"/>
+        <result property="file_size" column="file_size"/>
+        <result property="share_state" column="share_state"/>
+        <result property="share_time" column="share_time"/>
+        <result property="share_file.file_path" column="img_path"/>
+        <result property="share_file.file_name" column="img_name"/>
+        <result property="share_user.user_id" column="user_id"/>
+        <result property="share_user.user_name" column="user_name"/>
+    </resultMap>
+</mapper>

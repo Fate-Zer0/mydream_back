@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.TagDAO">
+    
+    <select id="getTagListByObjidAndType" resultMap="Tag">
+        SELECT c.conn_id,c.tag_id, t.tag_name, t.tag_state
+        FROM tb_tag_conn c
+        left join tb_tag t on c.tag_id = t.tag_id
+        WHERE c.obj_id = #{obj_id}
+          AND c.obj_type = #{obj_type}
+    </select>
+
+    <insert id="addTagConn" parameterType="com.example.mydream_back.dto.Tag">
+        INSERT INTO tb_tag_conn (obj_id, obj_type, tag_id) VALUES (#{obj_id}, #{obj_type}, #{tag_id})
+    </insert>
+
+    <insert id="addTag" parameterType="com.example.mydream_back.dto.Tag">
+        INSERT INTO tb_tag (tag_name, tag_state) VALUES (#{tag_name}, #{tag_state})
+    </insert>
+
+    <delete id="deleteTag" parameterType="com.example.mydream_back.dto.Tag">
+        DELETE FROM tb_tag_conn WHERE conn_id = #{conn_id}
+    </delete>
+
+    <select id="getTag" resultMap="Tag">
+        select * from tb_tag where tag_name = #{tag_name}
+    </select>
+
+    <resultMap id="Tag" type="com.example.mydream_back.dto.Tag">
+        <id property="tag_id" column="tag_id"/>
+        <result property="tag_name" column="tag_name"/>
+        <result property="tag_state" column="tag_state"/>
+        <result property="conn_id" column="conn_id"/>
+    </resultMap>
+
+</mapper>

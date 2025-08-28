@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.PageBoxDAO">
+    <insert id="addPage" parameterType="com.example.mydream_back.dto.PageBox">
+        INSERT INTO tb_page_info (pb_name, description, category, pb_img_id, pb_url,
+        status,pb_state,create_time
+        ) VALUES (#{pb_name} ,#{description},#{category},
+                  #{pb_img.file_id},#{pb_url},#{status}, #{pb_state}, #{createtime});
+    </insert>
+
+    <select id="queryPage" resultMap="PageBoxs">
+        SELECT pb_id, pb_name, description, category, img_path, img_name, pb_url,
+               status,pb_state,create_time
+        FROM tb_page_info
+        left join tb_user_img on img_id = pb_img_id
+        order by create_time desc;
+    </select>
+
+    <select id="queryPageByImgid" resultMap="PageBoxs">
+        SELECT pb_id, pb_name, description, category, img_path, img_name, pb_url,
+               status,pb_state,create_time
+        FROM tb_page_info
+                 left join tb_user_img on img_id = pb_img_id
+        where pb_img_id = #{img_id}
+        order by create_time desc;
+    </select>
+
+    <resultMap id="PageBoxs" type="com.example.mydream_back.dto.PageBox">
+        <id property="pb_id" column="pb_id"/>
+        <result property="pb_name" column="pb_name"/>
+        <result property="description" column="description"/>
+        <result property="category" column="category"/>
+        <result property="pb_url" column="pb_url"/>
+        <result property="status" column="status"/>
+        <result property="pb_state" column="pb_state"/>
+        <result property="createtime" column="create_time"/>
+        <result property="pb_img.file_path" column="img_path"/>
+        <result property="pb_img.file_name" column="img_name"/>
+    </resultMap>
+
+    <insert id="InsertPageImgFile" parameterType="com.example.mydream_back.dto.FileInfoDTO">
+        insert into tb_user_img (img_name,img_path,img_type) values (#{file_name} , #{file_path} , #{file_type}) ;
+    </insert>
+
+    <select id="queryPageImgFile" resultMap="Fileinfo">
+            SELECT img_id, img_name, img_path, img_type
+            FROM tb_user_img
+            where img_name = #{file_name} order by img_id desc;
+    </select>
+
+    <update id="updatePageImgFile">
+        update tb_user_img set user_id = #{user_id} where img_id = #{img_id}
+    </update>
+
+    <resultMap id="Fileinfo" type="com.example.mydream_back.dto.FileInfoDTO">
+        <id property="file_id" column="img_id"/>
+        <result property="file_name" column="img_name"/>
+        <result property="file_path" column="img_path"/>
+        <result property="file_type" column="img_type"/>
+    </resultMap>
+
+
+
+</mapper>

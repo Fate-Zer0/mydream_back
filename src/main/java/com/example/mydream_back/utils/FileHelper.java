@@ -83,4 +83,53 @@ public class FileHelper {
 
         return fileInfo;
     }
+
+    public static FileInfo uploadShareFile(MultipartFile file, String subDir) throws IOException {
+        // 校验文件是否为空
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("上传的文件不能为空");
+        }
+
+        // 校验文件大小
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("文件大小超过限制");
+        }
+
+        // 校验文件类型
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            throw new IllegalArgumentException("不允许的文件类型");
+        }
+
+        // 获取文件扩展名
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // 构建安全的文件名
+        String safeFileName = UUID.randomUUID() + fileExtension;
+
+        // 构建完整路径
+        Path targetPath = Paths.get(baseStoragePath, subDir);
+        if (!Files.exists(targetPath)) {
+            Files.createDirectories(targetPath);
+        }
+
+        Path finalPath = targetPath.resolve(safeFileName);
+        file.transferTo(finalPath);
+
+        // 构造返回结果
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setOriginalName(originalFilename);
+        fileInfo.setStoredName(safeFileName);
+        fileInfo.setFilePath(finalPath.toString());
+        fileInfo.setFileUrl(subDir + "/" + safeFileName);
+        fileInfo.setSize(file.getSize());
+        fileInfo.setContentType(contentType);
+        fileInfo.setExtension(fileExtension);
+
+        return fileInfo;
+    }
 }

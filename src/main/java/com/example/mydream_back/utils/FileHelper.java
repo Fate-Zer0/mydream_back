@@ -18,8 +18,7 @@ public class FileHelper {
     );
 
     // 最大文件大小（例如：10MB）
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
-
+    private static final long MAX_FILE_SIZE = 2 * 1024L * 1024 * 1024;
     // 文件保存根目录（可通过配置注入）
     private static String baseStoragePath = "/usr/myd/img/";
 
@@ -92,6 +91,7 @@ public class FileHelper {
 
         // 校验文件大小
         if (file.getSize() > MAX_FILE_SIZE) {
+            System.out.println(file.getSize());
             throw new IllegalArgumentException("文件大小超过限制");
         }
 

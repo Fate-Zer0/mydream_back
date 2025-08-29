@@ -25,6 +25,19 @@ public class AuthServiceImpl implements AuthService {
         }
         return null;
     }
+
+    public UserDTO getUserid(User user){
+        List<User> users = userDAO.getUserid(user);
+        if(users.size() > 0){
+            User t_user = users.get(0);
+            UserDTO userDTO = new UserDTO();
+            userDTO.setUser_id(t_user.getUser_id());
+            userDTO.setUser_name(t_user.getUser_name());
+            return userDTO;
+        }
+        return null;
+    }
+
     public int getUserCountByUsername(String user_name){
         return userDAO.getUserCountByUsername(user_name);
     }

@@ -9,11 +9,26 @@
         insert into tb_user (user_name,user_pw,createtime) values ( #{user_name} , #{user_pw} ,#{createtime}) ;
     </insert>
 
+    <select id="getUserid" parameterType="com.example.mydream_back.model.User" resultMap="user">
+        select u.user_id,u.user_name,u.user_pw from tb_user u
+        <where>
+            <if test="user_id != null and user_id != ''  ">
+                AND  u.user_id = #{user_id}
+            </if>
+            <if test="user_name != null">
+                AND  u.user_name = #{user_name}
+            </if>
+            <if test="user_pw != null">
+                AND  u.user_pw = #{user_pw}
+            </if>
+        </where>
+    </select>
+
     <select id="getUsers" parameterType="com.example.mydream_back.model.User" resultMap="user">
         select u.user_id,u.user_name,ui.img_path,ui.img_name from tb_user u
         left join tb_user_img ui on u.user_id = ui.user_id and ui.img_type = '10001'
         <where>
-            <if test="user_id != null">
+            <if test="user_id != null and user_id != ''">
                 AND  u.user_id = #{user_id}
             </if>
             <if test="user_name != null">

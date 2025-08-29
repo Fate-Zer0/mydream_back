@@ -6,6 +6,7 @@ import com.example.mydream_back.model.User;
 public interface AuthService {
 
     UserDTO chickUserLogin(User user);
+    UserDTO getUserid(User user);
     int getUserCountByUsername(String user_name);
     int signUp(User user);
 }

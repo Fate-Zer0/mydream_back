@@ -1,9 +1,12 @@
 package com.example.mydream_back.controllers.account;
 
+import com.example.mydream_back.dto.FileInfoDTO;
 import com.example.mydream_back.dto.ReturnValue;
 import com.example.mydream_back.dto.UserDTO;
+import com.example.mydream_back.model.FileInfo;
 import com.example.mydream_back.model.User;
 import com.example.mydream_back.services.account.AuthService;
+import com.example.mydream_back.services.account.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,8 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/chickLogin")
     public ResponseEntity<ReturnValue<UserDTO>> chickLogin(@RequestBody User user){
@@ -58,7 +63,19 @@ public class AuthController {
         user.setCreatetime(sdf.format(System.currentTimeMillis()));
         int i = authService.signUp(user);
         if(i > 0){
-            UserDTO userDTO = authService.chickUserLogin(user);
+            UserDTO userDTO = authService.getUserid(user);
+
+            UserDTO userDTO_t = new UserDTO();
+            userDTO_t.setUser_id(userDTO.getUser_id());
+            FileInfoDTO img = new FileInfoDTO();
+            img.setFile_path("/userimg/");
+            img.setFile_name("undefined.jpg");
+            img.setFile_type(10001);
+            userDTO_t.setUser_img(img);
+            userService.InsertUserFile(userDTO_t);
+
+            userDTO = authService.chickUserLogin(user);
+
             ret.setRetValue(userDTO);
             ret.isSuccess();
         }else{

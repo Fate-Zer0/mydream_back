@@ -20,8 +20,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private CustomHandshakeHandler customHandshakeHandler;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws") // 直接注册 WebSocket 端点
-                .setAllowedOriginPatterns(webSocketProperties.getAllowedOrigin()) // 只允许前端地址
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns(
+                        webSocketProperties.getAllowedOriginPatterns().toArray(new String[0])
+                )
                 .setHandshakeHandler(customHandshakeHandler)
                 .withSockJS();
     }

@@ -3,16 +3,18 @@ package com.example.mydream_back.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @ConfigurationProperties(prefix = "websocket")
 public class WebSocketProperties {
-    private String allowedOrigin;
+    private List<String> allowedOriginPatterns; // ✅ 改为 List
 
-    public String getAllowedOrigin() {
-        return allowedOrigin;
+    public List<String> getAllowedOriginPatterns() {
+        return allowedOriginPatterns;
     }
 
-    public void setAllowedOrigin(String allowedOrigin) {
-        this.allowedOrigin = allowedOrigin;
+    public void setAllowedOriginPatterns(List<String> allowedOriginPatterns) {
+        this.allowedOriginPatterns = allowedOriginPatterns;
     }
 }

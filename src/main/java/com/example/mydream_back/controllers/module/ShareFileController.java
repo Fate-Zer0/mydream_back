@@ -3,11 +3,15 @@ package com.example.mydream_back.controllers.module;
 import com.example.mydream_back.dao.model.TagDAO;
 import com.example.mydream_back.dto.*;
 import com.example.mydream_back.model.FileInfo;
+import com.example.mydream_back.services.model.jellyfin.JellyfinService;
 import com.example.mydream_back.services.model.pageBox.PageBoxService;
 import com.example.mydream_back.services.model.shareFile.ShareFileService;
 import com.example.mydream_back.utils.FileHelper;
+import com.example.mydream_back.utils.MediaUtils;
 import com.example.mydream_back.utils.TimeCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,6 +26,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/module/shareFile")
 public class ShareFileController {
+    private static final Logger log = LoggerFactory.getLogger(JellyfinService.class);
+
     @Autowired
     private PageBoxService pageBoxService;
     @Autowired
@@ -30,6 +36,8 @@ public class ShareFileController {
     private TagDAO tagDAO;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private JellyfinService jellyfinService;
     @PostMapping("/uploadShare")
     public ResponseEntity<ReturnValue<ShareFileInfo>> uploadImage(@RequestParam MultipartFile file, @RequestParam String shareFileInfoString) {
         ReturnValue<ShareFileInfo> returnValue = new ReturnValue<>();
@@ -52,6 +60,16 @@ public class ShareFileController {
             shareFileService.addShareFile(shareFileInfo);
             List<Tag> tags = shareFileInfo.getTags();
             shareFileInfo = shareFileService.queryShareFileByFileid(fileInfoDTO.getFile_id());
+
+            if (MediaUtils.isMediaFile(fileInfo.getStoredName())) {
+                String absolutePath = "/home/zfate/mydream/file/img/share/" + fileInfo.getStoredName();
+                String displayName = shareFileInfo.getFile_name();
+                String desc = shareFileInfo.getDescription();
+
+                jellyfinService.asyncHandleMediaFile(absolutePath, displayName,desc);
+
+                log.info("修改Jellyfin文件标题: {}", fileInfo.getStoredName());
+            }
 
             for (Tag tag: tags) {
                 List<Tag> tagList = tagDAO.getTag(tag.getTag_name());

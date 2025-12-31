@@ -20,8 +20,7 @@ public class FileHelper {
     // 最大文件大小（例如：10MB）
     private static final long MAX_FILE_SIZE = 2 * 1024L * 1024 * 1024;
     // 文件保存根目录（可通过配置注入）
-    private static String baseStoragePath = "/usr/myd/img/";
-
+    private static String baseStoragePath = "/home/zfate/mydream/file/img/";
     public void setBaseStoragePath(String baseStoragePath) {
         this.baseStoragePath = baseStoragePath;
     }

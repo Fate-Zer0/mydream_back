@@ -77,6 +77,7 @@ public class ShareFileController {
                     tag.setTag_state("1");
                     tagDAO.addTag(tag);
                 }
+                tag = tagDAO.getTag(tag.getTag_name()).get(0);
                 tagDAO.addTagConn(tag.getTag_id(),shareFileInfo.getShare_id(),"share");
             }
 

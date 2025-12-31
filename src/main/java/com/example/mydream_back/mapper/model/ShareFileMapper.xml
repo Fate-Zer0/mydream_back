@@ -11,16 +11,6 @@
         #{file_type},#{file_size},#{file_name},#{share_state}, #{share_time});
     </insert>
 
-    <select id="queryShareFile" resultMap="ShareFile">
-        SELECT share_id,description,file_name,file_type,file_size,share_state,share_time,
-               i.img_path, i.img_name,
-               u.user_id,u.user_name
-        FROM tb_share_file
-                 left join tb_user u on u.user_id = share_user_id
-                 left join tb_user_img i on i.img_id = share_file_id
-        order by share_time desc;
-    </select>
-
     <select id="queryShareFileByFileid" resultMap="ShareFile">
         SELECT share_id,description,file_name,file_type,file_size,share_state,share_time,
                i.img_path, i.img_name,
@@ -30,6 +20,31 @@
                  left join tb_user_img i on i.img_id = share_file_id
         where share_file_id = #{file_id}
         order by share_time desc;
+    </select>
+
+    <select id="queryShareFile" resultMap="ShareFile_n">
+        SELECT
+            s.share_id,
+            s.description,
+            s.file_name,
+            s.file_type,
+            s.file_size,
+            s.share_state,
+            s.share_time,
+            i.img_path,
+            i.img_name,
+            u.user_id,
+            u.user_name,
+            c.conn_id,
+            c.tag_id,
+            t.tag_name,
+            t.tag_state
+        FROM tb_share_file s
+                 LEFT JOIN tb_user u ON u.user_id = s.share_user_id
+                 LEFT JOIN tb_user_img i ON i.img_id = s.share_file_id
+                 LEFT JOIN tb_tag_conn c ON c.obj_id = s.share_id
+                 LEFT JOIN tb_tag t ON t.tag_id = c.tag_id
+        ORDER BY s.share_time DESC;
     </select>
 
     <resultMap id="ShareFile" type="com.example.mydream_back.dto.ShareFileInfo">
@@ -44,5 +59,37 @@
         <result property="share_file.file_name" column="img_name"/>
         <result property="share_user.user_id" column="user_id"/>
         <result property="share_user.user_name" column="user_name"/>
+    </resultMap>
+
+    <resultMap id="TagResultMap" type="com.example.mydream_back.dto.Tag">
+        <id property="conn_id" column="conn_id"/>
+        <result property="tag_id" column="tag_id"/>
+        <result property="tag_name" column="tag_name"/>
+        <result property="tag_state" column="tag_state"/>
+    </resultMap>
+
+    <resultMap id="ShareFile_n" type="com.example.mydream_back.dto.ShareFileInfo">
+        <id property="share_id" column="share_id"/>
+        <result property="description" column="description"/>
+        <result property="file_name" column="file_name"/>
+        <result property="file_type" column="file_type"/>
+        <result property="file_size" column="file_size"/>
+        <result property="share_state" column="share_state"/>
+        <result property="share_time" column="share_time"/>
+
+        <!-- 嵌套对象：share_file -->
+        <association property="share_file" javaType="com.example.mydream_back.dto.FileInfoDTO">
+            <result property="file_path" column="img_path"/>
+            <result property="file_name" column="img_name"/>
+        </association>
+
+        <!-- 嵌套对象：share_user -->
+        <association property="share_user" javaType="com.example.mydream_back.dto.UserDTO">
+            <id property="user_id" column="user_id"/>
+            <result property="user_name" column="user_name"/>
+        </association>
+
+        <!-- 集合：tags -->
+        <collection property="tags" ofType="com.example.mydream_back.dto.Tag" resultMap="TagResultMap"/>
     </resultMap>
 </mapper>

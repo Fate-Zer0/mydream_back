@@ -38,6 +38,7 @@ public class PageBoxServiceImpl implements PageBoxService{
                 tag.setTag_state("1");
                 tagDAO.addTag(tag);
             }
+            tag = tagDAO.getTag(tag.getTag_name()).get(0);
             tagDAO.addTagConn(tag.getTag_id(),pageBox.getPb_id(),"page");
         }
         FileInfoDTO pb_img = pageBox.getPb_img();

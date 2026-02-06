@@ -36,4 +36,5 @@ public interface UserDAO {
     int chickAnswer(@Param("secq_id") String secq_id,@Param("answer") String answer);
     void addUserStatus(UserInfo userInfo);
     void updateUserStatus(UserInfo userInfo);
+    List<Map<String, Object>> getSignInRanking(@Param("limit") int limit);
 }

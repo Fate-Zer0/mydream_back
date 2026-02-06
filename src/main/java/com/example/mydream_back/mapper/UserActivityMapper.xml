@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.UserActivityDAO">
+
+    <insert id="insertActivity" parameterType="com.example.mydream_back.model.UserActivity">
+        INSERT INTO tb_user_activity (
+            user_id, 
+            activity_type, 
+            activity_content, 
+            activity_title, 
+            activity_desc, 
+            related_id, 
+            is_public
+        ) VALUES (
+            #{userId}, 
+            #{activityType}, 
+            #{activityContent}, 
+            #{activityTitle}, 
+            #{activityDesc}, 
+            #{relatedId}, 
+            #{isPublic}
+        )
+    </insert>
+
+    <select id="getRecentActivities" resultType="map">
+        SELECT
+            a.activity_id AS activityId,
+            a.user_id AS userId,
+            u.user_name AS username,
+            COALESCE(ui.img_path, '') AS avatar,
+            a.activity_type AS activityType,
+            a.activity_title AS activityTitle,
+            a.activity_desc AS activityDesc,
+            a.related_id AS relatedId,
+            a.create_time AS createTime
+        FROM tb_user_activity a
+        INNER JOIN tb_user u ON a.user_id = u.user_id
+        LEFT JOIN tb_user_img ui ON u.user_id = ui.user_id AND ui.img_type = '10001'
+        WHERE a.is_public = 1
+        ORDER BY a.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getUserActivities" resultType="map">
+        SELECT
+            a.activity_id AS activityId,
+            a.user_id AS userId,
+            u.user_name AS username,
+            COALESCE(ui.img_path, '') AS avatar,
+            a.activity_type AS activityType,
+            a.activity_title AS activityTitle,
+            a.activity_desc AS activityDesc,
+            a.related_id AS relatedId,
+            a.create_time AS createTime
+        FROM tb_user_activity a
+        INNER JOIN tb_user u ON a.user_id = u.user_id
+        LEFT JOIN tb_user_img ui ON u.user_id = ui.user_id AND ui.img_type = '10001'
+        WHERE a.user_id = #{userId} AND a.is_public = 1
+        ORDER BY a.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

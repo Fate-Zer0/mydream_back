@@ -206,4 +206,14 @@ public class UserController {
         return ResponseEntity.ok(returnValue);
     }
 
+    @GetMapping("/getSignInRanking")
+    public ResponseEntity<ReturnValue<List<Map<String, Object>>>> getSignInRanking(
+            @RequestParam(defaultValue = "10") int limit) {
+        ReturnValue<List<Map<String, Object>>> returnValue = new ReturnValue<>();
+        List<Map<String, Object>> ranking = userService.getSignInRanking(limit);
+        returnValue.setRetValue(ranking);
+        returnValue.isSuccess();
+        return ResponseEntity.ok(returnValue);
+    }
+
 }

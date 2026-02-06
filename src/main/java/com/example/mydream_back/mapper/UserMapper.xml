@@ -270,4 +270,64 @@
         where s.user_id = #{user.user_id}
     </update>
 
+    <select id="getSignInRanking" resultType="map">
+
+        SELECT
+        u.user_id AS userId,
+        u.user_name AS username,
+        COALESCE(ui.img_path, '') AS avatar,
+        COALESCE(consecutive_days.streak, 0) AS consecutiveDays,
+        COALESCE(total_days.total, 0) AS totalSignInDays,
+        COALESCE(info.user_points, '0') AS totalPoints
+        FROM tb_user u
+        LEFT JOIN tb_user_img ui
+        ON u.user_id = ui.user_id AND ui.img_type = '10001'
+        LEFT JOIN tb_user_info info
+        ON u.user_id = info.user_id
+        LEFT JOIN (
+        -- ✅ 修正后的连续签到计算
+        WITH cte AS (
+        SELECT
+        user_id,
+        signin_date,
+        DATE_SUB(
+        signin_date,
+        INTERVAL ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY signin_date ASC) - 1 DAY
+        ) AS grp
+        FROM tb_user_signin
+        WHERE signin_date &lt;= CURDATE()
+        ),
+        latest_date AS (
+        SELECT user_id, MAX(signin_date) AS last_signin
+        FROM tb_user_signin
+        WHERE signin_date &lt;= CURDATE()
+        GROUP BY user_id
+        ),
+        current_grp AS (
+        SELECT c.user_id, c.grp
+        FROM cte c
+        INNER JOIN latest_date l
+        ON c.user_id = l.user_id AND c.signin_date = l.last_signin
+        )
+        SELECT
+        c.user_id,
+        COUNT(*) AS streak
+        FROM cte c
+        INNER JOIN current_grp g
+        ON c.user_id = g.user_id AND c.grp = g.grp
+        GROUP BY c.user_id
+        ) consecutive_days ON u.user_id = consecutive_days.user_id
+        LEFT JOIN (
+        SELECT user_id, COUNT(*) AS total
+        FROM tb_user_signin
+        GROUP BY user_id
+        ) total_days ON u.user_id = total_days.user_id
+        WHERE consecutive_days.streak > 0 OR total_days.total > 0
+        ORDER BY
+        consecutive_days.streak DESC,
+        total_days.total DESC,
+        CAST(info.user_points AS UNSIGNED) DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

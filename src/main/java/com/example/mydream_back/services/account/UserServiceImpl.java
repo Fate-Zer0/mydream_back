@@ -5,6 +5,7 @@ import com.example.mydream_back.dto.SecurityQuestion;
 import com.example.mydream_back.dto.UserDTO;
 import com.example.mydream_back.dto.UserInfo;
 import com.example.mydream_back.model.User;
+import com.example.mydream_back.services.activity.UserActivityService;
 import com.example.mydream_back.utils.StringHelper;
 import com.example.mydream_back.utils.TimeCreator;
 import org.apache.ibatis.annotations.Param;
@@ -19,21 +20,61 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserDAO userDAO;
+    
+    @Autowired
+    private UserActivityService userActivityService;
     public void signInToday(String userId) {
         userDAO.signInToday(userId);
+        
+        // 获取当前连续签到天数
+        int consecutiveDays = userDAO.getContinuousSignInDays(userId);
+        
+        // 根据连续签到天数计算积分奖励
+        int pointsReward = calculateSignInPoints(consecutiveDays);
+        
         UserInfo userInfo = userDAO.getUserInfoByUserId(userId);
         if(StringHelper.isEmpty(userInfo.getUser_points())){
             userInfo = new UserInfo();
             UserDTO user = new UserDTO();
             user.setUser_id(userId);
             userInfo.setUser(user);
-            userInfo.setUser_points("5");
+            userInfo.setUser_points(String.valueOf(pointsReward));
             userDAO.addUserInfo(userInfo);
         }else{
             String user_points = userInfo.getUser_points();
-            userInfo.setUser_points(String.valueOf(Integer.parseInt(user_points) + 5));
+            userInfo.setUser_points(String.valueOf(Integer.parseInt(user_points) + pointsReward));
             userDAO.updateUserInfo(userInfo);
         }
+        
+        // 创建签到动态
+        userActivityService.createSignInActivity(userId, consecutiveDays, pointsReward);
+    }
+    
+    /**
+     * 根据连续签到天数计算积分奖励
+     * @param consecutiveDays 连续签到天数
+     * @return 积分奖励
+     */
+    private int calculateSignInPoints(int consecutiveDays) {
+        // 基础奖励规则
+        if (consecutiveDays == 1) return 5;      // 第1天
+        if (consecutiveDays == 2) return 6;      // 第2天
+        if (consecutiveDays == 3) return 7;      // 第3天
+        if (consecutiveDays <= 6) return 10;     // 第4-6天
+        if (consecutiveDays == 7) return 20;     // 第7天（周奖励）
+        if (consecutiveDays <= 13) return 15;    // 第8-13天
+        if (consecutiveDays == 14) return 50;    // 第14天（双周奖励）
+        if (consecutiveDays <= 20) return 15;    // 第15-20天
+        if (consecutiveDays == 21) return 100;   // 第21天（三周里程碑）
+        if (consecutiveDays <= 29) return 20;    // 第22-29天
+        if (consecutiveDays == 30) return 200;   // 第30天（月度大奖）
+        if (consecutiveDays <= 59) return 25;    // 第31-59天
+        if (consecutiveDays == 60) return 300;   // 第60天（双月大奖）
+        if (consecutiveDays <= 99) return 30;    // 第61-99天
+        if (consecutiveDays == 100) return 500;  // 第100天（传奇里程碑）
+        
+        // 100天以后，每天奖励35积分
+        return 35;
     }
     public int getConsecutiveSignInDays(String user_id){
         return userDAO.getConsecutiveSignInDays(user_id);
@@ -55,6 +96,24 @@ public class UserServiceImpl implements UserService {
         map.put("consecutiveSignInDays",consecutiveSignInDays);
         map.put("signInCount",signInCount);
         map.put("isSigned",isSigned);
+        
+        // 添加今日和明日奖励信息
+        int todayPoints = 0;
+        int tomorrowPoints = 0;
+        
+        if (isSigned) {
+            // 已签到，显示今天获得的积分
+            todayPoints = calculateSignInPoints(consecutiveSignInDays);
+            tomorrowPoints = calculateSignInPoints(consecutiveSignInDays + 1);
+        } else {
+            // 未签到，显示今天可以获得的积分
+            todayPoints = calculateSignInPoints(consecutiveSignInDays + 1);
+            tomorrowPoints = calculateSignInPoints(consecutiveSignInDays + 2);
+        }
+        
+        map.put("todayPoints", todayPoints);
+        map.put("tomorrowPoints", tomorrowPoints);
+        map.put("currentDay", isSigned ? consecutiveSignInDays : consecutiveSignInDays + 1);
 
         return map;
     }
@@ -143,5 +202,13 @@ public class UserServiceImpl implements UserService {
         }else{
             userDAO.updateUserStatus(userInfo);
         }
+    }
+    
+    @Override
+    public List<Map<String, Object>> getSignInRanking(int limit) {
+        if (limit <= 0) {
+            limit = 10; // 默认返回前10名
+        }
+        return userDAO.getSignInRanking(limit);
     }
 }

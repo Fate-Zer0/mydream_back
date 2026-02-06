@@ -29,4 +29,5 @@ public interface UserService {
     void addUserStatus(UserInfo userInfo);
     void updateUserStatus(UserInfo userInfo);
     void changerUserStatus(String user_id,String status);
+    List<Map<String, Object>> getSignInRanking(int limit);
 }

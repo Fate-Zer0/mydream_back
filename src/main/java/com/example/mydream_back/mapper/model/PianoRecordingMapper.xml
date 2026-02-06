@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mydream_back.dao.model.PianoRecordingDAO">
+
+    <insert id="insertRecording" parameterType="com.example.mydream_back.model.PianoRecording" 
+            useGeneratedKeys="true" keyProperty="recordingId">
+        INSERT INTO tb_piano_recording (
+            user_id, 
+            recording_name, 
+            recording_data, 
+            duration, 
+            note_count, 
+            is_public
+        ) VALUES (
+            #{userId}, 
+            #{recordingName}, 
+            #{recordingData}, 
+            #{duration}, 
+            #{noteCount}, 
+            #{isPublic}
+        )
+    </insert>
+
+    <select id="getRecordingList" resultType="map">
+        SELECT
+            pr.recording_id AS recordingId,
+            pr.user_id AS userId,
+            u.user_name AS username,
+            COALESCE(ui.img_path, '') AS avatar,
+            pr.recording_name AS recordingName,
+            pr.duration AS duration,
+            pr.note_count AS noteCount,
+            pr.create_time AS createTime,
+            pr.play_count AS playCount,
+            COALESCE(like_count.total, 0) AS likeCount,
+            COALESCE(user_like.is_liked, 0) AS isLiked
+        FROM tb_piano_recording pr
+        INNER JOIN tb_user u ON pr.user_id = u.user_id
+        LEFT JOIN tb_user_img ui ON u.user_id = ui.user_id AND ui.img_type = '10001'
+        LEFT JOIN (
+            SELECT obj_id, COUNT(*) AS total
+            FROM tb_record
+            WHERE rec_type = '61002' AND iseffect = 1
+            GROUP BY obj_id
+        ) like_count ON like_count.obj_id = pr.recording_id
+        LEFT JOIN (
+            SELECT obj_id, 1 AS is_liked
+            FROM tb_record
+            WHERE rec_type = '61002' AND iseffect = 1 AND activeman = #{userId}
+        ) user_like ON user_like.obj_id = pr.recording_id
+        WHERE pr.is_public = 1
+        ORDER BY like_count.total DESC, pr.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="increasePlayCount">
+        UPDATE tb_piano_recording
+        SET play_count = play_count + 1
+        WHERE recording_id = #{recordingId}
+    </update>
+
+    <select id="getRecordingById" resultType="com.example.mydream_back.model.PianoRecording">
+        SELECT
+            recording_id AS recordingId,
+            user_id AS userId,
+            recording_name AS recordingName,
+            recording_data AS recordingData,
+            duration,
+            note_count AS noteCount,
+            create_time AS createTime,
+            play_count AS playCount,
+            like_count AS likeCount,
+            is_public AS isPublic
+        FROM tb_piano_recording
+        WHERE recording_id = #{recordingId}
+    </select>
+
+    <delete id="deleteRecording">
+        DELETE FROM tb_piano_recording
+        WHERE recording_id = #{recordingId} AND user_id = #{userId}
+    </delete>
+
+</mapper>

@@ -29,7 +29,7 @@
             pr.recording_id AS recordingId,
             pr.user_id AS userId,
             u.user_name AS username,
-            COALESCE(ui.img_path, '') AS avatar,
+            COALESCE(CONCAT('/file', ui.img_path, ui.img_name), '') AS avatar,
             pr.recording_name AS recordingName,
             pr.duration AS duration,
             pr.note_count AS noteCount,

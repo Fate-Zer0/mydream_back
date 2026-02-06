@@ -275,7 +275,7 @@
         SELECT
         u.user_id AS userId,
         u.user_name AS username,
-        COALESCE(ui.img_path, '') AS avatar,
+        COALESCE(CONCAT('/file', ui.img_path, ui.img_name), '') AS avatar,
         COALESCE(consecutive_days.streak, 0) AS consecutiveDays,
         COALESCE(total_days.total, 0) AS totalSignInDays,
         COALESCE(info.user_points, '0') AS totalPoints
